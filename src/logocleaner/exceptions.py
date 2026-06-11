@@ -12,3 +12,7 @@ class InvalidColorError(LogoCleanerError):
 
 class UnsupportedModeError(LogoCleanerError):
     """Raised when an unsupported cleaning mode is requested."""
+
+
+class BackgroundColorDetectionError(LogoCleanerError):
+    """Raised when automatic background color detection fails."""
