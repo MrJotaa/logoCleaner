@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
+from textwrap import dedent
 from typing import Annotated
 
 import numpy as np
@@ -16,9 +17,48 @@ from logocleaner.image_io.save import save_png
 from logocleaner.strategies.border_connected import BorderConnectedStrategy
 from logocleaner.strategies.global_color import GlobalColorStrategy
 
+APP_EPILOG = "\n".join(
+    [
+        "Strategies:",
+        "",
+        "  global   Remove all pixels similar to the background color. Aggressive.",
+        "",
+        "  border   Remove only background-like pixels connected to image borders. Safer.",
+        "",
+        "Examples:",
+        "",
+        '  logocleaner clean input.png output.png --mode global --bg "#ffffff" --tolerance 40',
+        "",
+        "  logocleaner clean input.png output.png --mode border --bg auto --tolerance 30",
+        "",
+        "More info:",
+        "",
+        "  logocleaner clean --help",
+        "",
+        "  logocleaner strategies",
+    ]
+)
+
+CLEAN_EPILOG = "\n".join(
+    [
+        "Strategies:",
+        "",
+        "  global   Aggressive. Removes matching pixels anywhere in the image.",
+        "",
+        "  border   Safer. Removes only matching pixels connected to image borders.",
+        "",
+        "Examples:",
+        "",
+        '  logocleaner clean input.png output.png --mode global --bg "#ffffff" --tolerance 40',
+        "",
+        "  logocleaner clean input.png output.png --mode border --bg auto --tolerance 30",
+    ]
+)
+
 app = typer.Typer(
     name="logocleaner",
     help="Remove uniform backgrounds from logo images.",
+    epilog=APP_EPILOG,
     no_args_is_help=True,
 )
 
@@ -33,7 +73,11 @@ class CleaningMode(str, Enum):
     border = "border"
 
 
-@app.command()
+@app.command(
+    help="Remove a uniform background from a logo image.",
+    short_help="Remove a logo background.",
+    epilog=CLEAN_EPILOG,
+)
 def clean(
     input_path: Annotated[
         Path,
@@ -100,6 +144,37 @@ def clean(
     except LogoCleanerError as exc:
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
+
+
+@app.command(
+    help="Show available background removal strategies.",
+    short_help="Show available strategies.",
+)
+def strategies() -> None:
+    """Show available background removal strategies."""
+
+    typer.echo(
+        dedent(
+            """\
+            Available strategies:
+
+              global
+                Removes all pixels similar to the selected background color.
+                Best for simple logos on a flat background.
+                Risk: can remove internal logo details if they have a similar color.
+
+              border
+                Removes only background-like pixels connected to the image border.
+                Best for badges, circular, patches, shields, and logos with light internal details.
+                Risk: may preserve internal holes that are visually part of the background.
+
+            Examples:
+
+              logocleaner clean input.png output.png --mode global --bg "#ffffff" --tolerance 40
+              logocleaner clean input.png output.png --mode border --bg auto --tolerance 30
+            """
+        )
+    )
 
 
 def _resolve_background_color(bg: str, image_array: np.ndarray) -> tuple[int, int, int]:
