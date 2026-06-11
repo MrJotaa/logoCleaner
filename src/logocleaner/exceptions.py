@@ -20,3 +20,11 @@ class BackgroundColorDetectionError(LogoCleanerError):
 
 class InvalidToleranceError(LogoCleanerError):
     """Raised when a tolerance value is invalid."""
+
+
+class ImageLoadError(LogoCleanerError):
+    """Raised when an image cannot be loaded."""
+
+
+class ImageSaveError(LogoCleanerError):
+    """Raised when an image cannot be saved."""
