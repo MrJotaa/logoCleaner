@@ -16,3 +16,7 @@ class UnsupportedModeError(LogoCleanerError):
 
 class BackgroundColorDetectionError(LogoCleanerError):
     """Raised when automatic background color detection fails."""
+
+
+class InvalidToleranceError(LogoCleanerError):
+    """Raised when a tolerance value is invalid."""
